@@ -3,6 +3,13 @@ const ctx = canvas.getContext('2d');
 const pPoints = document.querySelector('.stats #points');
 const ePoints = document.querySelector('.stats #enemyPoints');
 
+const faviconTag = document.getElementById('favicon');
+const favCanvas = document.createElement('canvas');
+favCanvas.width = 16;
+favCanvas.height = 16;
+const favCtx = favCanvas.getContext('2d');
+
+
 const sounds = {
   hit: "sfx/hit.wav",
   win: "sfx/win.mp3",
@@ -49,6 +56,37 @@ const keys = {};
 
 window.addEventListener("keydown", e => { keys[e.key] = true });
 window.addEventListener("keyup", e => { keys[e.key] = false });
+
+// Not important to logic, just a function to "animate" the favicon
+function drawFavicon() {
+    if (!faviconTag) return;
+
+    favCtx.fillStyle = "black";
+    favCtx.fillRect(0, 0, 16, 16);
+
+    const scaleX = 16 / canvas.width;
+    const scaleY = 16 / canvas.height;
+
+    const pY = Math.round(pPaddle.y * scaleY);
+    const pHeight = Math.max(3, Math.round(pPaddle.height * scaleY));
+    favCtx.fillStyle = "white";
+    favCtx.fillRect(0, pY, 1, pHeight);
+
+    const eY = Math.round(ePaddle.y * scaleY);
+    const eHeight = Math.max(3, Math.round(ePaddle.height * scaleY));
+    favCtx.fillRect(15, eY, 1, eHeight);
+
+    const bX = Math.floor(ball.x * scaleX);
+    const bY = Math.floor(ball.y * scaleY);
+    
+    const clampedBX = Math.max(1, Math.min(14, bX));
+    const clampedBY = Math.max(0, Math.min(15, bY));
+    
+    favCtx.fillRect(clampedBX, clampedBY, 1, 1);
+
+    faviconTag.href = favCanvas.toDataURL('image/png');
+}
+
 
 function isColliding(b, p) {
     return (
@@ -196,6 +234,9 @@ function render() {
 function loop() {
     logic();
     render();
+    if (!document.hidden) {
+        drawFavicon();
+    }
     requestAnimationFrame(loop);
 }
 
