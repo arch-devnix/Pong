@@ -3,6 +3,18 @@ const ctx = canvas.getContext('2d')
 const pPoints = document.querySelector('.stats #points')
 const ePoints = document.querySelector('.stats #enemyPoints')
 
+const sounds = {
+  hit: "sfx/hit.wav",
+  win: "sfx/win.mp3",
+  loss: "sfx/loss.mp3",
+};
+
+function playSound(filePath) {
+  const audio = new Audio(filePath);
+  audio.play().catch(() => {
+  });
+}
+
 let playerScore = 0;
 let enemyScore = 0;
 
@@ -45,12 +57,17 @@ function isColliding(b, p) {
     );
 }
 
-function resetBall() {
+function resetBall(towardLeft) {
     ball.x = canvas.width / 2;
     ball.y = canvas.height / 2;
+    ball.vx = towardLeft ? -2.5 : 2.5;
+    ball.vy = (Math.random() > 0.5 ? 1 : -1) * (1.5 + Math.random() * 1.5);
+}
 
-    ball.vx = Math.random() > 0.5 ? 2.5 : -2.5;
-    ball.vy = Math.random() > 0.5 ? 2.5 : -2.5;
+function clampSpeed() {
+    const MAX = 8;
+    ball.vx = Math.max(-MAX, Math.min(MAX, ball.vx));
+    ball.vy = Math.max(-MAX, Math.min(MAX, ball.vy));
 }
 
 function logic() {
@@ -69,13 +86,15 @@ function logic() {
     if (ball.x - ball.radius > canvas.width) {
         playerScore++;
         pPoints.textContent = playerScore;
-        resetBall()
+        playSound(sounds.win);
+        resetBall(true);
     }
 
     if (ball.x + ball.radius < 0) {
         enemyScore++;
         ePoints.textContent = enemyScore;
-        resetBall()
+        playSound(sounds.loss);
+        resetBall(false);
     }
 
     // pPaddle Movment
@@ -95,7 +114,9 @@ function logic() {
         ball.vx *= -1
         ball.vy *= 1.05
         ball.vx *= 1.05
+        clampSpeed();
         ball.x = pPaddle.x + pPaddle.width + ball.radius
+        playSound(sounds.hit);
     }
 
     // ePaddle Movment "ai"
@@ -121,7 +142,9 @@ function logic() {
         ball.vx *= -1;
         ball.vy *= 1.05;
         ball.vx *= 1.05;
+        clampSpeed();
         ball.x = ePaddle.x - ball.radius; // Push ball out to the left
+        playSound(sounds.hit);
     }
 
 }
@@ -153,7 +176,7 @@ function render() {
     ctx.strokeStyle = "rgba(255, 255, 255, 0.3)";
     ctx.lineWidth = 4
     ctx.stroke();
-    ctx.closePath;
+    ctx.closePath();
     ctx.setLineDash([]);
 
     // ==Center Circle==
