@@ -1,20 +1,29 @@
-const canvas = document.getElementById("pong")
-const ctx = canvas.getContext('2d')
+const canvas = document.getElementById("pong");
+const ctx = canvas.getContext('2d');
+
+const faviconTag = document.getElementById('favicon');
+const favCanvas = document.createElement('canvas');
+favCanvas.width = 16;
+favCanvas.height = 16;
+const favCtx = favCanvas.getContext('2d');
+
 
 const sounds = {
-  hit: "sfx/hit.wav",
-  win: "sfx/win.mp3",
-  loss: "sfx/loss.mp3",
+    hit: "sfx/hit.wav",
+    win: "sfx/win.mp3",
+    loss: "sfx/loss.mp3",
 };
 
 function playSound(filePath) {
-  const audio = new Audio(filePath);
-  audio.play().catch(() => {
-  });
+    const audio = new Audio(filePath);
+    audio.play().catch(() => {
+    });
 }
 
 let playerScore = 0;
 let enemyScore = 0;
+
+const multiplier = 1.10;
 
 const pPaddle = {
     x: 0,
@@ -25,7 +34,7 @@ const pPaddle = {
 }
 
 const ePaddle = {
-    x: canvas.width - pPaddle.width,
+    x: canvas.width - 10,
     y: canvas.height / 2,
     speed: 5,
     width: 10,
@@ -45,6 +54,37 @@ const keys = {};
 
 window.addEventListener("keydown", e => { keys[e.key] = true });
 window.addEventListener("keyup", e => { keys[e.key] = false });
+
+// Not important to logic, just a function to "animate" the favicon
+function drawFavicon() {
+    if (!faviconTag) return;
+
+    favCtx.fillStyle = "black";
+    favCtx.fillRect(0, 0, 16, 16);
+
+    const scaleX = 16 / canvas.width;
+    const scaleY = 16 / canvas.height;
+
+    const pY = Math.round(pPaddle.y * scaleY);
+    const pHeight = Math.max(3, Math.round(pPaddle.height * scaleY));
+    favCtx.fillStyle = "white";
+    favCtx.fillRect(0, pY, 1, pHeight);
+
+    const eY = Math.round(ePaddle.y * scaleY);
+    const eHeight = Math.max(3, Math.round(ePaddle.height * scaleY));
+    favCtx.fillRect(15, eY, 1, eHeight);
+
+    const bX = Math.floor(ball.x * scaleX);
+    const bY = Math.floor(ball.y * scaleY);
+    
+    const clampedBX = Math.max(1, Math.min(14, bX));
+    const clampedBY = Math.max(0, Math.min(15, bY));
+    
+    favCtx.fillRect(clampedBX, clampedBY, 1, 1);
+
+    faviconTag.href = favCanvas.toDataURL('image/png');
+}
+
 
 function isColliding(b, p) {
     return (
@@ -107,9 +147,9 @@ function logic() {
         let hitPos = (ball.y - (pPaddle.y + pPaddle.height / 2)) / (pPaddle.height / 2);
 
         ball.vy = hitPos * 5;
-        ball.vx *= -1
-        ball.vy *= 1.05
-        ball.vx *= 1.05
+        ball.vx *= -1;
+        ball.vy *= multiplier;
+        ball.vx *= multiplier;
         clampSpeed();
         ball.x = pPaddle.x + pPaddle.width + ball.radius
         playSound(sounds.hit);
@@ -136,8 +176,8 @@ function logic() {
 
         ball.vy = hitPos * 5;
         ball.vx *= -1;
-        ball.vy *= 1.05;
-        ball.vx *= 1.05;
+        ball.vy *= multiplier;
+        ball.vx *= multiplier;
         clampSpeed();
         ball.x = ePaddle.x - ball.radius;
         playSound(sounds.hit);
@@ -149,6 +189,33 @@ function logic() {
 function render() {
     ctx.fillStyle = "rgba(0, 0, 0, 0.35)";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // ==MidLine==
+    ctx.beginPath()
+    ctx.setLineDash([15, 20]);
+    ctx.moveTo(canvas.width / 2, 0);
+    ctx.lineTo(canvas.width / 2, canvas.height);
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.3)";
+    ctx.lineWidth = 4
+    ctx.stroke();
+    ctx.closePath();
+    ctx.setLineDash([]);
+
+    // ==Center Circle==
+    ctx.beginPath();
+    ctx.arc(canvas.width / 2, canvas.height / 2, 50, 0, Math.PI * 2);
+    ctx.setLineDash([15, 20]);
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.3)";
+    ctx.lineWidth = 4
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // == Scores ==
+    ctx.font = "48px monospace";
+    ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
+    ctx.textAlign = "center";
+    ctx.fillText(playerScore, canvas.width / 4, 70);
+    ctx.fillText(enemyScore, (canvas.width / 4) * 3, 70);
 
     // ==Ball==
     ctx.beginPath();
@@ -164,42 +231,15 @@ function render() {
     // ==Enemy Paddle==
     ctx.fillStyle = "white"
     ctx.fillRect(ePaddle.x, ePaddle.y, ePaddle.width, ePaddle.height);
-
-    // ==MidLine==
-    ctx.beginPath()
-    ctx.setLineDash([15, 20]);
-    ctx.moveTo(canvas.width / 2, 0);
-    ctx.lineTo(canvas.width / 2, canvas.height);
-    ctx.strokeStyle = "rgba(255, 255, 255, 0.3)";
-    ctx.lineWidth = 4
-    ctx.stroke();
-    ctx.closePath();
-    ctx.setLineDash([]);
-
-    // ==Center Circle==
-    ctx.beginPath();
-    ctx.arc(canvas.width / 2, canvas.height / 2, 50 , 0, Math.PI * 2);
-    ctx.setLineDash([15, 20]);
-    ctx.strokeStyle = "rgba(255, 255, 255, 0.3)";
-    ctx.lineWidth = 4
-    ctx.stroke();
-    ctx.setLineDash([]);
-
-    // ==Score==
-    ctx.font = "48px monospace";
-    ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
-    ctx.textAlign = "center";
-    
-    // Player score
-    ctx.fillText(playerScore, canvas.width / 4, 70);
-    // Enemy score
-    ctx.fillText(enemyScore, (canvas.width / 4) * 3, 70);
 }
 
 
 function loop() {
     logic();
     render();
+    if (!document.hidden) {
+        drawFavicon();
+    }
     requestAnimationFrame(loop);
 }
 
