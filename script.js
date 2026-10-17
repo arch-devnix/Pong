@@ -65,7 +65,7 @@ function resetBall(towardLeft) {
 }
 
 function clampSpeed() {
-    const MAX = 8;
+    const MAX = 12;
     ball.vx = Math.max(-MAX, Math.min(MAX, ball.vx));
     ball.vy = Math.max(-MAX, Math.min(MAX, ball.vy));
 }
@@ -143,7 +143,7 @@ function logic() {
         ball.vy *= 1.05;
         ball.vx *= 1.05;
         clampSpeed();
-        ball.x = ePaddle.x - ball.radius; // Push ball out to the left
+        ball.x = ePaddle.x - ball.radius;
         playSound(sounds.hit);
     }
 
@@ -151,12 +151,13 @@ function logic() {
 
 
 function render() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height)
+    ctx.fillStyle = "rgba(0, 0, 0, 0.35)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     // ==Ball==
     ctx.beginPath();
     ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
-    ctx.fillStyle = "white"
+    ctx.fillStyle = "white";
     ctx.fill();
     ctx.closePath();
 
