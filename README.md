@@ -1,1 +1,1 @@
-arch-devnix.github.io/Pong
+[Play Pong](https://arch-devnix.github.io/Pong)
