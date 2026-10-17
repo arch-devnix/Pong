@@ -1,7 +1,7 @@
-const canvas = document.getElementById("pong")
-const ctx = canvas.getContext('2d')
-const pPoints = document.querySelector('.stats #points')
-const ePoints = document.querySelector('.stats #enemyPoints')
+const canvas = document.getElementById("pong");
+const ctx = canvas.getContext('2d');
+const pPoints = document.querySelector('.stats #points');
+const ePoints = document.querySelector('.stats #enemyPoints');
 
 const sounds = {
   hit: "sfx/hit.wav",
