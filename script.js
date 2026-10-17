@@ -18,6 +18,8 @@ function playSound(filePath) {
 let playerScore = 0;
 let enemyScore = 0;
 
+const multiplier = 1.10;
+
 const pPaddle = {
     x: 0,
     y: canvas.height / 2,
@@ -111,9 +113,9 @@ function logic() {
         let hitPos = (ball.y - (pPaddle.y + pPaddle.height / 2)) / (pPaddle.height / 2);
 
         ball.vy = hitPos * 5;
-        ball.vx *= -1
-        ball.vy *= 1.05
-        ball.vx *= 1.05
+        ball.vx *= -1;
+        ball.vy *= multiplier;
+        ball.vx *= multiplier;
         clampSpeed();
         ball.x = pPaddle.x + pPaddle.width + ball.radius
         playSound(sounds.hit);
@@ -140,8 +142,8 @@ function logic() {
 
         ball.vy = hitPos * 5;
         ball.vx *= -1;
-        ball.vy *= 1.05;
-        ball.vx *= 1.05;
+        ball.vy *= multiplier;
+        ball.vx *= multiplier;
         clampSpeed();
         ball.x = ePaddle.x - ball.radius;
         playSound(sounds.hit);
